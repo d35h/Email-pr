@@ -1,49 +1,51 @@
 <?php
 //////////////////////// Functions ////////////////////////
-	function connect($host, $user, $password){
-		$conn = new mysqli($host, $user, $password);
-	
-		if ($conn->connect_error){
-			die("Connection failed: " . $conn->connect_error);
-		}
+	function PDOConnect($host, $database, $user, $password) {
+		$dns = 'mysqli:dbname='.$database.";host=".$host;
+		$pdo = new \PDO($dns, $user, $password, [
+			\PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+			\PDO::ATTR_PERSISTENT => TRUE,
+		]);
+		$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 		
-		return $conn;
+		return $pdo;
 	}
 ////////////////////////////////////////////////////////////
 
-	$conn = connect("localhost", "root", "mescalito1");
-	mysqli_select_db($conn, "cl_db");
+	$pdo = PDOConnect('localhost', 'cl_db', 'root', 'mescalito1');
 	
-	echo "<head>\n";
-		echo "\t<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\"/>\n";
-	echo "</head>\n";
-	echo "<table class=\"values-table\">\n";
+	//array for storage result
+	$rows = [];
 	
-	$result = mysqli_query($conn, "SELECT * FROM data");
-	echo "\t<tr>\n";
-	while ($property = mysqli_fetch_field($result))
-		echo "\t<td class=\"td-mid\">$property->name</td>\n";
-	echo "\t</tr>\n";
-		
-	$query = sprintf("SELECT * FROM data");
-	$result = mysqli_query($conn, $query);
-	
-	
+	$statement = $pdo->prepare('SELECT * FROM `data`');
+	$statement->execute();
 
-	while ($line = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-		echo "\t<tr>\n";
-		foreach ($line as $col_value) {
-			try{
-				$col_value = (DateTime) $col_value;
-				$col_value = $col_value->format('Y-m-d');
-			}
-			
-			echo gettype($col_value);
-			
-			echo "\t\t<td class=\"value\">$col_value</td>\n";
-		}
-		echo "\t</tr>\n";
+	foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+		array_push($rows, $row);
 	}
-	
-	echo "</table>\n";
 ?>
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="style.css"/>
+	</head>
+	<body>
+		<table class="values-table">
+			<th>
+				<td class="td-mid">field1</td>
+				<td class="td-mid">field2</td>
+			</th>
+			<?php if (count($rows)):?>
+				<?php foreach ($rows as $row):?>
+				<tr>
+					<td class="value"><?php echo $row['field1']?></td>
+					<td class="value"><?php echo $row['field2']?></td>
+				</tr>
+				<?php endforeach?>
+			<?php else:?>
+				<tr>
+					<td class="value" colspan="2">No records found</td>
+				</tr>
+			<?php endif?>
+		</table>
+	</body>
+</html>
