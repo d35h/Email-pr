@@ -1,0 +1,31 @@
+/* Table */
+
+.values-table {
+	border: 1px solid black;
+	border-spacing: 5px;
+	margin: 5;
+	font-weight: bold;
+	border-collapse: collapse;
+}
+
+.values-table td{
+	padding-left: 2px;
+    padding-right: 2px;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+}
+
+.values-table .value{
+	color: green;
+}
+
+.td-mid{
+	text-align: center; 
+    vertical-align: middle;
+	padding-left: 2px;
+    padding-right: 2px;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+}
